@@ -1,0 +1,22 @@
+---
+title: "Course Enrollment Data Over Time"
+author: "Katherine Binney"
+date: "10/10/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Biggest New Class Fall 2018
+
+```{r}
+library(tidyverse)
+library(readxl)
+
+fall_2017 <- read_excel("class_enrollment_summary_by_term_10.20.17.xlsx", skip = 2, col_names = TRUE)
+```
+
+
+
