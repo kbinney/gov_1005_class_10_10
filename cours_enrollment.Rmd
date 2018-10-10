@@ -16,6 +16,16 @@ library(tidyverse)
 library(readxl)
 
 fall_2017 <- read_excel("class_enrollment_summary_by_term_10.20.17.xlsx", skip = 2, col_names = TRUE)
+fall_2018 <- read_excel("class_enrollment_summary_by_term_10.20.17.xlsx", skip = 2, col_names = TRUE)
+
+glimpse(fall_2018)
+glimpse(fall_2017)
+
+
+fall_2018 %>% 
+  group_by(`Course ID`) %>% 
+  summarise(total_enrollment = sum(Total)) %>% 
+  glimpse()
 ```
 
 
