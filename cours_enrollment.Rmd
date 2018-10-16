@@ -14,18 +14,64 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 library(readxl)
+library(janitor)
 
-fall_2017 <- read_excel("class_enrollment_summary_by_term_10.20.17.xlsx", skip = 2, col_names = TRUE)
-fall_2018 <- read_excel("class_enrollment_summary_by_term_10.20.17.xlsx", skip = 2, col_names = TRUE)
+fall_2015 <- read_excel("CourseEnrollmentStatistics.xlsx") %>% 
+              clean_names()
+fall_2016 <- read_excel("copy_of_class_enrollment_summary_by_term_10.06.2016.xlsx", skip = 2, col_names = TRUE) %>% 
+  clean_names()
+fall_2017 <- read_excel("class_enrollment_summary_by_term_10.20.17.xlsx", skip = 2, col_names = TRUE) %>% 
+  clean_names()
+fall_2018 <- read_excel("class_enrollment_summary_by_term_10_12.xlsx", skip = 2, col_names = TRUE) %>% 
+  clean_names()
+
+fall_2015_courses <- levels(factor(fall_2015$course_id))
+fall_2016_courses <- levels(factor(fall_2016$course_id))
+fall_2017_courses <- levels(factor(fall_2017$course_id))
+
+new_courses_fall_2016 <- fall_2016 %>% 
+  filter(!(course_id %in% fall_2015_courses)) %>% 
+  group_by(course_id) %>% 
+  summarise(total_enrollment = sum(total), 
+            course_title = first(course_title),
+            course_name = first(course_name)) %>% 
+  arrange(desc(total_enrollment))
+
+new_courses_fall_2017 <- fall_2017 %>% 
+  filter(!(course_id %in% fall_2016_courses),
+         !(course_id %in% fall_2015_courses)) %>% 
+  group_by(course_id) %>% 
+  summarise(total_enrollment = sum(total), 
+            course_title = first(course_title),
+            course_name = first(course_name)) %>% 
+  arrange(desc(total_enrollment))
+
+new_courses_fall_2018 <- fall_2018 %>% 
+  filter(!(course_id %in% fall_2017_courses), 
+         !(course_id %in% fall_2016_courses),
+         !(course_id %in% fall_2015_courses))%>% 
+  group_by(course_id) %>% 
+  summarise(total_enrollment = sum(total), 
+            course_title = first(course_title),
+            course_name = first(course_name)) %>% 
+  arrange(desc(total_enrollment))
+
+new_courses <- new_courses_fall_2016 %>% 
+  union(new_courses_fall_2017, by = c("course_id")) %>% 
+  union(new_courses_fall_2018, by = c("course_id")) %>% 
+  filter(course_id != "Grand Total")
 
 
-fall_2018 %>% 
-  mutate(class_title = parse_factor(`Course Title`, levels = NULL)) %>% 
-  group_by(class_title) %>% 
-  summarise(total_enrollment = sum(Total))
+new_courses %>% 
+  ggplot(aes(x = total_enrollment), rm.na = TRUE) +
+  geom_histogram()
 
-fall_2017_courses <- distinct(factor(fall_2017$`Course Title`))
+new_courses %>% 
+  summary()
 
+new_courses %>% 
+  arrange(desc(total_enrollment)) %>% 
+  head(n = 50)
 ```
 
 
